@@ -1,0 +1,229 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard sales-reports">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading sales data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <h3>Unable to load data</h3>
+    </div>
+    <p>{{ errorMessage }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !errorMessage" class="dashboard-content">
+    <div class="header-section">
+      <h1>Sales Reports</h1>
+      <p class="subtitle">Track and analyze sales transactions</p>
+
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon">💰</div>
+          <div>
+            <div class="summary-label">Today's Sales</div>
+            <div class="summary-value">
+              {{ summary.todaySalesAmount | currency }} ({{ summary.todaySalesCount }} orders)
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div>
+            <div class="summary-label">This Month Sales</div>
+            <div class="summary-value">{{ summary.monthSalesAmount | currency }}</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">📈</div>
+          <div>
+            <div class="summary-label">Current View</div>
+            <div class="summary-value">
+              {{ sales.length }} sales ({{ getSalesTotal() | currency }})
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-header">
+        <h2>Sales Overview</h2>
+
+        <div class="view-toggle">
+          <button
+            class="btn secondary"
+            [class.active]="chartView === 'monthly'"
+            (click)="changeChartView('monthly')"
+          >
+            Monthly
+          </button>
+
+          <button
+            class="btn secondary"
+            [class.active]="chartView === 'yearly'"
+            (click)="changeChartView('yearly')"
+          >
+            Yearly
+          </button>
+        </div>
+      </div>
+
+      <!-- Monthly Sales Chart -->
+      <div class="panel chart-panel">
+        <div class="panel-header">
+          <h2>Monthly Sales Overview</h2>
+        </div>
+        <div class="chart-container">
+          <canvas #salesChart></canvas>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="panel filters-panel">
+        <div class="panel-header">
+          <h3>Filters & Controls</h3>
+          <div class="filter-actions">
+            <button class="btn secondary" (click)="resetFilters()" [disabled]="applyingFilters">
+              Clear Filters
+            </button>
+            <div *ngIf="applyingFilters" class="filter-loading">
+              <div class="spinner-small"></div>
+              Applying...
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input id="startDate" type="date" [(ngModel)]="filters.startDate" [max]="today" />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              type="date"
+              [(ngModel)]="filters.endDate"
+              [min]="filters.startDate"
+              [max]="today"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="search">Search</label>
+            <input
+              id="search"
+              type="text"
+              [(ngModel)]="filters.search"
+              placeholder="Search invoice, customer, or product..."
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cashier">Cashier</label>
+            <input
+              id="cashier"
+              type="text"
+              [(ngModel)]="filters.cashier"
+              placeholder="Cashier name"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="form-group action-buttons">
+            <button class="btn primary" (click)="applyFilters()" [disabled]="applyingFilters">
+              <span *ngIf="!applyingFilters">Apply Filters</span>
+              <span *ngIf="applyingFilters" class="btn-loading"
+                ><div class="spinner-small"></div
+              ></span>
+            </button>
+            <button
+              class="btn success"
+              (click)="exportData()"
+              [disabled]="exportingData || sales.length === 0"
+            >
+              <span *ngIf="!exportingData">📥 Export Sales</span>
+              <span *ngIf="exportingData" class="btn-loading"
+                ><div class="spinner-small"></div>
+                Exporting...</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="panel sales-table-panel">
+        <div class="panel-header">
+          <h2>Sales Transactions</h2>
+          <div class="table-summary">
+            <span>Showing {{ sales.length }} of {{ totalRecords }} records</span>
+            <span>Total Amount: {{ getSalesTotal() | currency }}</span>
+            <span>Average Sale: {{ getAverageSale() | currency }}</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Cashier</th>
+                <th>Payment Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="salesLoading">
+                <td colspan="9" class="loading-row">Loading sales data...</td>
+              </tr>
+              <tr *ngIf="!salesLoading && sales.length === 0">
+                <td colspan="9">No sales records found.</td>
+              </tr>
+              <tr *ngFor="let s of sales">
+                <td>{{ s.invoiceNumber || 'N/A' }}</td>
+                <td>{{ s.date | date : 'shortDate' }}</td>
+                <td>{{ s.customer || 'Walk-in Customer' }}</td>
+                <td>{{ s.product || 'N/A' }}</td>
+                <td>{{ s.quantity || 0 }}</td>
+                <td>{{ s.unitPrice | currency }}</td>
+                <td>{{ s.total | currency }}</td>
+                <td>{{ s.cashier || 'N/A' }}</td>
+                <td>{{ s.paymentMethod || 'Cash' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination FIXED -->
+        <div *ngIf="totalPages > 1" class="pagination">
+          <button class="btn secondary" (click)="prevPage()" [disabled]="currentPage === 1">
+            Previous
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalRecords }} records)</span>
+          <button
+            class="btn secondary"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

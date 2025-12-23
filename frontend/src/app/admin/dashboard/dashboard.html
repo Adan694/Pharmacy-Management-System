@@ -1,0 +1,154 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard">
+  <!-- Loading & Error (same as before) -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-alert">
+    <h3>Unable to load dashboard</h3>
+    <p>{{ error }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error">
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">System overview</p>
+
+    <!-- KPI & Alerts Cards Grid -->
+    <div class="cards-grid">
+      <!-- Today Sales -->
+      <div class="card gradient-blue">
+        <div class="card-icon">💰</div>
+        <div class="card-content">
+          <div class="card-label">Today Sales</div>
+          <div class="card-value">{{ summary.todaySalesAmount | currency }}</div>
+        </div>
+      </div>
+
+      <!-- This Month Sales -->
+      <div class="card gradient-green">
+        <div class="card-icon">📈</div>
+        <div class="card-content">
+          <div class="card-label">This Month Sales</div>
+          <div class="card-value">{{ summary.monthSalesAmount | currency }}</div>
+        </div>
+      </div>
+
+      <!-- Total Purchases -->
+      <div class="card gradient-purple">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+          <div class="card-label">Total Purchases</div>
+          <div class="card-value">{{ summary.totalPurchasesAmount | currency }}</div>
+        </div>
+      </div>
+
+      <!-- Total Medicines -->
+      <div class="card gradient-orange">
+        <div class="card-icon">💊</div>
+        <div class="card-content">
+          <div class="card-label">Total Medicines</div>
+          <div class="card-value">{{ alerts.totalMedicines }}</div>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="card gradient-teal">
+        <div class="card-icon">👥</div>
+        <div class="card-content">
+          <div class="card-label">Active Users</div>
+          <div class="card-value">{{ stats.activeUsers }}</div>
+        </div>
+      </div>
+
+      <!-- Low Stock Medicines -->
+      <div class="card gradient-red">
+        <div class="card-icon">⚠️</div>
+        <div class="card-content">
+          <div class="card-label">Low Stock</div>
+          <div class="card-value">{{ alerts.lowStock }}</div>
+        </div>
+      </div>
+
+      <!-- Expired Medicines -->
+      <div class="card gradient-pink">
+        <div class="card-icon">⏰</div>
+        <div class="card-content">
+          <div class="card-label">Expired Medicines</div>
+          <div class="card-value">{{ alerts.expired }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <!-- Chart Panel -->
+    <div class="panel chart-panel">
+      <div class="panel-header">
+        <h2>Monthly Sales vs Purchases</h2>
+        <div class="chart-period">
+          <span>Period:</span>
+          <select name="h" title="h">
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="365">Last Year</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <!-- Loading State -->
+        <div *ngIf="chartLoading" class="chart-loading">
+          <div class="chart-loading-spinner"></div>
+          <p>Loading chart data...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!chartLoading && !hasChartData" class="chart-empty">
+          <div class="chart-empty-icon">📊</div>
+          <h3>No Chart Data Available</h3>
+          <p>Start making sales and purchases to see analytics here</p>
+        </div>
+
+        <!-- Chart Canvas -->
+        <canvas #dashboardChart></canvas>
+      </div>
+
+      <!-- Chart Legend -->
+      <div class="chart-legend">
+        <div class="legend-item active">
+          <div class="legend-color sales"></div>
+          <span class="legend-label">Sales:</span>
+          <span class="legend-value">{{ getTotalSales() | currency }}</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color purchases"></div>
+          <span class="legend-label">Purchases:</span>
+          <span class="legend-value">{{ getTotalPurchases() | currency }}</span>
+        </div>
+      </div>
+
+      <!-- Chart Toolbar -->
+      <div class="chart-toolbar">
+        <div class="chart-summary">
+          <div class="summary-stat">
+            <div class="summary-label">Total Revenue</div>
+            <div class="summary-value">{{ getNetProfit() | currency }}</div>
+            <div class="summary-change positive">↑ 12.5%</div>
+          </div>
+        </div>
+
+        <div class="chart-actions">
+          <button class="chart-btn" (click)="downloadChart()"><span>📥</span> Export</button>
+          <button class="chart-btn primary" (click)="refreshChart()">
+            <span>🔄</span> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

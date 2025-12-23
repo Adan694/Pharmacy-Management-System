@@ -1,0 +1,372 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard sales-purchase-management">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading reports data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <h3>Unable to load data</h3>
+    </div>
+    <p>{{ errorMessage }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !errorMessage" class="dashboard-content">
+    <div class="header-section">
+      <div>
+        <h1>Sales & Purchase Reports</h1>
+        <p class="subtitle">Track sales transactions and purchase orders</p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <!-- Today's Sales -->
+        <div class="summary-card">
+          <div class="summary-icon">💰</div>
+          <div>
+            <div class="summary-label">Today's Sales</div>
+            <div class="summary-value">
+              {{ summary.todaySalesAmount | currency }} ({{ summary.todaySalesCount }} orders)
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="summary-card">
+          <div class="summary-icon">📦</div>
+          <div>
+            <div class="summary-label">Total Orders</div>
+            <div class="summary-value">
+              {{ summary.totalOrdersCount }} orders ({{ summary.totalPurchasesAmount | currency }})
+            </div>
+          </div>
+        </div>
+
+        <!-- This Month -->
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div>
+            <div class="summary-label">This Month Sales</div>
+            <div class="summary-value">{{ summary.monthSalesAmount | currency }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'sales'"
+          (click)="activeTab = 'sales'"
+        >
+          <span class="tab-icon">💰</span>
+          Sales Reports
+          <span class="tab-badge">{{ sales.length }}</span>
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'purchases'"
+          (click)="activeTab = 'purchases'"
+        >
+          <span class="tab-icon">📦</span>
+          Purchase Reports
+          <span class="tab-badge">{{ purchases.length }}</span>
+        </button>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="panel filters-panel">
+        <div class="panel-header">
+          <h3>Filters & Controls</h3>
+          <div class="filter-actions">
+            <button class="btn secondary" (click)="resetFilters()" [disabled]="applyingFilters">
+              Clear Filters
+            </button>
+            <div *ngIf="applyingFilters" class="filter-loading">
+              <div class="spinner-small"></div>
+              Applying...
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              [(ngModel)]="filters.startDate"
+              placeholder="Start Date"
+              [max]="today"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              type="date"
+              [(ngModel)]="filters.endDate"
+              placeholder="End Date"
+              [min]="filters.startDate"
+              [max]="today"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="search">Search</label>
+            <input
+              id="search"
+              type="text"
+              [(ngModel)]="filters.search"
+              placeholder="Search invoice, order, or name..."
+            />
+          </div>
+
+          <div class="form-group" *ngIf="activeTab === 'sales'">
+            <label for="cashier">Cashier</label>
+            <input
+              id="cashier"
+              type="text"
+              [(ngModel)]="filters.cashier"
+              placeholder="Cashier name"
+            />
+          </div>
+
+          <div class="form-group" *ngIf="activeTab === 'purchases'">
+            <label for="supplier">Supplier</label>
+            <input
+              id="supplier"
+              type="text"
+              [(ngModel)]="filters.supplier"
+              placeholder="Supplier name"
+            />
+          </div>
+
+          <div class="form-group action-buttons">
+            <button class="btn primary" (click)="applyFilters()" [disabled]="applyingFilters">
+              <span *ngIf="!applyingFilters">Apply Filters</span>
+              <span *ngIf="applyingFilters" class="btn-loading">
+                <div class="spinner-small"></div>
+              </span>
+            </button>
+            <button class="btn success" (click)="exportData()" [disabled]="exportingData">
+              <span *ngIf="!exportingData">
+                <span class="btn-icon">📥</span> Export
+                {{ activeTab === 'sales' ? 'Sales' : 'Purchases' }}
+              </span>
+              <span *ngIf="exportingData" class="btn-loading">
+                <div class="spinner-small"></div>
+                Exporting...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="panel" *ngIf="activeTab === 'sales' && !tableLoading">
+        <div class="panel-header">
+          <h2>Sales Transactions</h2>
+          <div class="table-summary">
+            <span class="summary-item">Total Records: {{ sales.length }}</span>
+            <span class="summary-item">Total Amount: {{ getSalesTotal() | currency }}</span>
+            <span class="summary-item">Average Sale: {{ getAverageSale() | currency }}</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Monthly Sales Overview</h2>
+          <canvas #monthlySalesChart></canvas>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Cashier</th>
+                <th>Payment Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading State -->
+              <tr *ngIf="salesLoading">
+                <td colspan="9" class="loading-row">
+                  <div class="row-loader"></div>
+                  Loading sales data...
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="!salesLoading && sales.length === 0">
+                <td colspan="9" class="empty-row">
+                  <div *ngIf="hasActiveFilters()">No sales found for the selected filters</div>
+                  <div *ngIf="!hasActiveFilters()">No sales records available</div>
+                </td>
+              </tr>
+
+              <!-- Sales Data -->
+              <tr *ngFor="let s of sales">
+                <td>
+                  <span class="invoice-badge">{{ s.invoiceNumber }}</span>
+                </td>
+                <td>{{ s.date | date : 'shortDate' }}</td>
+                <td>{{ s.customer || 'Walk-in Customer' }}</td>
+                <td>{{ s.product }}</td>
+                <td class="quantity-cell">{{ s.quantity }}</td>
+                <td>{{ s.unitPrice | currency }}</td>
+                <td class="amount-cell">{{ s.total | currency }}</td>
+                <td>
+                  <span class="cashier-badge">{{ s.cashier }}</span>
+                </td>
+                <td>
+                  <span
+                    class="payment-badge"
+                    [class.cash]="s.paymentMethod === 'Cash'"
+                    [class.card]="s.paymentMethod === 'Card'"
+                    [class.digital]="s.paymentMethod === 'Digital'"
+                  >
+                    {{ s.paymentMethod || 'Cash' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="sales.length > 0" class="pagination">
+          <button
+            class="btn secondary"
+            (click)="prevPage('sales')"
+            [disabled]="currentPageSales === 1"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPageSales }} of {{ totalPagesSales }}</span>
+          <button
+            class="btn secondary"
+            (click)="nextPage('sales')"
+            [disabled]="currentPageSales === totalPagesSales"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      <!-- Purchases Table -->
+      <div class="panel" *ngIf="activeTab === 'purchases' && !tableLoading">
+        <div class="panel-header">
+          <h2>Purchase Orders</h2>
+          <div class="table-summary">
+            <span class="summary-item">Total Orders: {{ purchases.length }}</span>
+            <span class="summary-item">Total Cost: {{ getPurchasesTotal() | currency }}</span>
+            <span class="summary-item">Avg. Cost: {{ getAveragePurchase() | currency }}</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Medicine</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Total Cost</th>
+                <th>Status</th>
+                <th>Payment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading State -->
+              <tr *ngIf="purchasesLoading">
+                <td colspan="9" class="loading-row">
+                  <div class="row-loader"></div>
+                  Loading purchase data...
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="!purchasesLoading && purchases.length === 0">
+                <td colspan="9" class="empty-row">
+                  <div *ngIf="hasActiveFilters()">No purchases found for the selected filters</div>
+                  <div *ngIf="!hasActiveFilters()">No purchase records available</div>
+                </td>
+              </tr>
+
+              <!-- Purchases Data -->
+              <tr *ngFor="let p of purchases">
+                <td>
+                  <span class="order-badge">{{ p.orderNumber }}</span>
+                </td>
+                <td>{{ p.date | date : 'shortDate' }}</td>
+                <td>{{ p.supplier }}</td>
+                <td>{{ p.medicine }}</td>
+                <td class="quantity-cell">{{ p.quantity }}</td>
+                <td>{{ p.unitCost | currency }}</td>
+                <td class="amount-cell">{{ p.totalCost | currency }}</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.pending]="p.status === 'Pending'"
+                    [class.received]="p.status === 'Received'"
+                    [class.partial]="p.status === 'Partial'"
+                    [class.cancelled]="p.status === 'Cancelled'"
+                  >
+                    {{ p.status }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="payment-status"
+                    [class.paid]="p.paymentStatus === 'Paid'"
+                    [class.pending]="p.paymentStatus === 'Pending'"
+                    [class.overdue]="p.paymentStatus === 'Overdue'"
+                  >
+                    {{ p.paymentStatus || 'Pending' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="purchases.length > 0" class="pagination">
+          <button
+            class="btn secondary"
+            (click)="prevPage('purchases')"
+            [disabled]="currentPagePurchases === 1"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPagePurchases }} of {{ totalPagesPurchases }}</span>
+          <button
+            class="btn secondary"
+            (click)="nextPage('purchases')"
+            [disabled]="currentPagePurchases === totalPagesPurchases"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

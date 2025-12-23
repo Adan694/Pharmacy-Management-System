@@ -1,0 +1,514 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard inventory-management">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading inventory data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <h3>Unable to load data</h3>
+    </div>
+    <p>{{ error }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <div class="header-section">
+      <div>
+        <h1>Inventory Management</h1>
+        <p class="subtitle">Manage medicines in the system</p>
+      </div>
+      <button class="btn primary" (click)="openAddModal()">
+        <span class="btn-icon">+</span> Add New Medicine
+      </button>
+    </div>
+
+    <!-- Inventory Summary Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Medicines</h3>
+        <span>{{ inventoryStats.totalMedicines || 0 }}</span>
+      </div>
+      <div class="stat-card warning">
+        <h3>Low Stock</h3>
+        <span>{{ inventoryStats.lowStock || 0 }}</span>
+      </div>
+      <div class="stat-card danger">
+        <h3>Expired</h3>
+        <span>{{ inventoryStats.expired || 0 }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Total Value</h3>
+        <span>{{ inventoryStats.totalValue | currency }}</span>
+      </div>
+    </div>
+
+    <!-- Medicines Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Medicines</h2>
+        <div class="table-actions">
+          <input
+            type="text"
+            placeholder="Search medicines..."
+            class="search-input"
+            [(ngModel)]="searchTerm"
+            (input)="filterMedicines()"
+          />
+          <div *ngIf="tableLoading" class="table-loading">Updating...</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Brand</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Expiry</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loading State -->
+            <tr *ngIf="tableLoading">
+              <td colspan="7" class="loading-row">
+                <div class="row-loader"></div>
+                Loading medicines...
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="!tableLoading && filteredMedicines.length === 0">
+              <td colspan="7" class="empty-row">
+                <div *ngIf="searchTerm">No medicines found for "{{ searchTerm }}"</div>
+                <div *ngIf="!searchTerm">No medicines available</div>
+              </td>
+            </tr>
+
+            <!-- Medicines Data -->
+            <tr *ngFor="let m of filteredMedicines">
+              <!-- Editable row -->
+              <td *ngIf="editingMedicineId !== m.id">{{ m.name }}</td>
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  [(ngModel)]="editMedicine.name"
+                  name="editName"
+                  placeholder="Name"
+                  title="Medicine Name"
+                  required
+                  class="edit-input"
+                />
+              </td>
+
+              <td *ngIf="editingMedicineId !== m.id">{{ m.brand }}</td>
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  [(ngModel)]="editMedicine.brand"
+                  name="editBrand"
+                  placeholder="Brand"
+                  title="Medicine Brand"
+                  required
+                  class="edit-input"
+                />
+              </td>
+
+              <td *ngIf="editingMedicineId !== m.id">{{ m.category }}</td>
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  [(ngModel)]="editMedicine.category"
+                  name="editCategory"
+                  placeholder="Category"
+                  title="Medicine Category"
+                  required
+                  class="edit-input"
+                />
+              </td>
+
+              <td *ngIf="editingMedicineId !== m.id">{{ m.price | currency }}</td>
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  type="number"
+                  [(ngModel)]="editMedicine.price"
+                  name="editPrice"
+                  placeholder="Price"
+                  title="Medicine Price"
+                  required
+                  min="0"
+                  step="0.01"
+                  class="edit-input"
+                />
+              </td>
+
+              <td *ngIf="editingMedicineId !== m.id" [class.low-stock]="m.quantity <= 5">
+                {{ m.quantity }}
+              </td>
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  type="number"
+                  [(ngModel)]="editMedicine.quantity"
+                  name="editQuantity"
+                  placeholder="Quantity"
+                  title="Medicine Quantity"
+                  required
+                  min="0"
+                  class="edit-input"
+                />
+              </td>
+
+              <td *ngIf="editingMedicineId !== m.id" [class.expired]="isExpired(m.expiryDate)">
+                {{ m.expiryDate | date : 'shortDate' }}
+              </td>
+
+              <td *ngIf="editingMedicineId === m.id">
+                <input
+                  type="date"
+                  [(ngModel)]="editMedicine.expiryDate"
+                  name="editExpiryDate"
+                  title="Expiry Date"
+                  required
+                  class="edit-input"
+                />
+              </td>
+
+              <!-- Action buttons -->
+              <td class="action-buttons">
+                <div *ngIf="editingMedicineId !== m.id" class="btn-group">
+                  <button class="btn primary" (click)="startEdit(m)">Edit</button>
+                  <button class="btn danger" (click)="deleteMedicine(m.id)">Delete</button>
+                </div>
+                <div *ngIf="editingMedicineId === m.id" class="btn-group">
+                  <button
+                    class="btn success"
+                    (click)="updateMedicine()"
+                    [disabled]="updatingMedicine"
+                  >
+                    <span *ngIf="!updatingMedicine">Save</span>
+                    <span *ngIf="updatingMedicine" class="btn-loading">
+                      <div class="spinner-small"></div>
+                    </span>
+                  </button>
+                  <button class="btn danger" (click)="cancelEdit()" [disabled]="updatingMedicine">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="filteredMedicines.length > 0" class="pagination">
+        <button class="btn secondary" (click)="prevPage()" [disabled]="currentPage === 1">
+          Previous
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="btn secondary" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Medicine Modal -->
+  <div *ngIf="showAddModal" class="modal-overlay" (click)="closeModalOnOverlay($event)">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>Add New Medicine</h2>
+        <button class="modal-close" (click)="closeAddModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="addMedicine()" #medicineForm="ngForm" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Medicine Name *</label>
+              <input
+                id="name"
+                placeholder="e.g., Paracetamol 500mg"
+                [(ngModel)]="medicine.name"
+                name="name"
+                required
+                [disabled]="addingMedicine"
+              />
+              <div class="form-hint">Enter the generic or brand name</div>
+            </div>
+
+            <div class="form-group">
+              <label for="brand">Brand *</label>
+              <input
+                id="brand"
+                placeholder="e.g., Cipla, Sun Pharma"
+                [(ngModel)]="medicine.brand"
+                name="brand"
+                required
+                [disabled]="addingMedicine"
+              />
+              <div class="form-hint">Manufacturer or brand name</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select
+                id="category"
+                [(ngModel)]="medicine.category"
+                name="category"
+                required
+                [disabled]="addingMedicine"
+                class="category-select"
+              >
+                <option value="">Select Category</option>
+                <option value="Antibiotic">Antibiotic</option>
+                <option value="Analgesic">Analgesic</option>
+                <option value="Antihistamine">Antihistamine</option>
+                <option value="Antacid">Antacid</option>
+                <option value="Vitamin">Vitamin</option>
+                <option value="Antidepressant">Antidepressant</option>
+                <option value="Antidiabetic">Antidiabetic</option>
+                <option value="Cardiovascular">Cardiovascular</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="form-hint">Select medicine category</div>
+            </div>
+
+            <div class="form-group">
+              <label for="price">Price *</label>
+              <div class="price-input-group">
+                <span class="currency-symbol">₹</span>
+                <input
+                  id="price"
+                  type="number"
+                  placeholder="0.00"
+                  [(ngModel)]="medicine.price"
+                  name="price"
+                  required
+                  min="0"
+                  step="0.01"
+                  [disabled]="addingMedicine"
+                />
+              </div>
+              <div class="form-hint">Price per unit</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quantity">Quantity *</label>
+              <input
+                id="quantity"
+                type="number"
+                placeholder="e.g., 100"
+                [(ngModel)]="medicine.quantity"
+                name="quantity"
+                required
+                min="0"
+                [disabled]="addingMedicine"
+              />
+              <div class="form-hint">Available stock quantity</div>
+            </div>
+
+            <div class="form-group">
+              <label for="expiryDate">Expiry Date *</label>
+              <div class="date-input-group">
+                <input
+                  id="expiryDate"
+                  type="date"
+                  [(ngModel)]="medicine.expiryDate"
+                  name="expiryDate"
+                  required
+                  [disabled]="addingMedicine"
+                  [min]="today"
+                />
+                <span class="date-icon">📅</span>
+              </div>
+              <div class="form-hint">Medicine expiry date</div>
+              <div
+                *ngIf="medicine.expiryDate && isExpired(medicine.expiryDate)"
+                class="expiry-warning"
+              >
+                ⚠️ This medicine will expire soon or has expired
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="closeAddModal()"
+              [disabled]="addingMedicine"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn primary"
+              [disabled]="!medicineForm.valid || addingMedicine"
+            >
+              <span *ngIf="!addingMedicine"> <span class="btn-icon">+</span> Add Medicine </span>
+              <span *ngIf="addingMedicine" class="btn-loading">
+                <div class="spinner-small"></div>
+                Adding...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Medicine Modal -->
+  <div *ngIf="showEditModal" class="modal-overlay" (click)="closeModalOnOverlay($event)">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>Edit Medicine</h2>
+        <button class="modal-close" (click)="closeEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="updateMedicine()" #editMedicineForm="ngForm" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editName">Medicine Name *</label>
+              <input
+                id="editName"
+                [(ngModel)]="editMedicine.name"
+                name="editName"
+                placeholder="e.g., Paracetamol 500mg"
+                required
+                [disabled]="updatingMedicine"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="editBrand">Brand *</label>
+              <input
+                id="editBrand"
+                [(ngModel)]="editMedicine.brand"
+                name="editBrand"
+                placeholder="e.g., Cipla, Sun Pharma"
+                required
+                [disabled]="updatingMedicine"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editCategory">Category *</label>
+              <select
+                id="editCategory"
+                [(ngModel)]="editMedicine.category"
+                name="editCategory"
+                required
+                [disabled]="updatingMedicine"
+                class="category-select"
+              >
+                <option value="">Select Category</option>
+                <option value="Antibiotic">Antibiotic</option>
+                <option value="Analgesic">Analgesic</option>
+                <option value="Antihistamine">Antihistamine</option>
+                <option value="Antacid">Antacid</option>
+                <option value="Vitamin">Vitamin</option>
+                <option value="Antidepressant">Antidepressant</option>
+                <option value="Antidiabetic">Antidiabetic</option>
+                <option value="Cardiovascular">Cardiovascular</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editPrice">Price *</label>
+              <div class="price-input-group">
+                <span class="currency-symbol">₹</span>
+                <input
+                  id="editPrice"
+                  type="number"
+                  [(ngModel)]="editMedicine.price"
+                  name="editPrice"
+                  placeholder="0.00"
+                  required
+                  min="0"
+                  step="0.01"
+                  [disabled]="updatingMedicine"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editQuantity">Quantity *</label>
+              <input
+                id="editQuantity"
+                type="number"
+                [(ngModel)]="editMedicine.quantity"
+                name="editQuantity"
+                placeholder="e.g., 100"
+                required
+                min="0"
+                [disabled]="updatingMedicine"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="editExpiryDate">Expiry Date *</label>
+              <div class="date-input-group">
+                <input
+                  id="editExpiryDate"
+                  type="date"
+                  [(ngModel)]="editMedicine.expiryDate"
+                  name="editExpiryDate"
+                  required
+                  [disabled]="updatingMedicine"
+                  [min]="today"
+                />
+                <span class="date-icon">📅</span>
+              </div>
+              <div
+                *ngIf="editMedicine.expiryDate && isExpired(editMedicine.expiryDate)"
+                class="expiry-warning"
+              >
+                ⚠️ This medicine will expire soon or has expired
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="closeEditModal()"
+              [disabled]="updatingMedicine"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn success"
+              [disabled]="!editMedicineForm.valid || updatingMedicine"
+            >
+              <span *ngIf="!updatingMedicine"> 💾 Save Changes </span>
+              <span *ngIf="updatingMedicine" class="btn-loading">
+                <div class="spinner-small"></div>
+                Saving...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

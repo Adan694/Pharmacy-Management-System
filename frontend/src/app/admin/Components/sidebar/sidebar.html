@@ -1,0 +1,73 @@
+<!-- Mobile Toggle Button -->
+<button class="sidebar-toggle" (click)="toggleSidebar()" *ngIf="isMobile">
+  <span *ngIf="!isSidebarOpen">☰</span>
+  <span *ngIf="isSidebarOpen">✕</span>
+</button>
+
+<!-- Mobile Overlay -->
+<div
+  class="sidebar-overlay"
+  [class.mobile-open]="isMobile && isSidebarOpen"
+  (click)="toggleSidebar()"
+  *ngIf="isMobile"
+></div>
+
+<!-- Sidebar -->
+<aside
+  class="sidebar"
+  [class.mobile-open]="isMobile && isSidebarOpen"
+  [class.collapsed]="isSidebarCollapsed"
+>
+  <div class="logo">
+    <span>💊</span>
+    <h2>PharmaAdmin</h2>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="sidebar-profile" *ngIf="user">
+    <div class="profile-avatar">
+      {{ getUserInitial() }}
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">{{ user.name || 'User' }}</div>
+      <div class="profile-role">{{ user.role || 'Admin' }}</div>
+    </div>
+  </div>
+
+  <nav>
+    <a routerLink="/admin" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a routerLink="/admin/users" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">👤</span>
+      <span>Users</span>
+    </a>
+
+    <a routerLink="/admin/medicines" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">💉</span>
+      <span>Medicines</span>
+    </a>
+
+    <a routerLink="/admin/reports" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">📈</span>
+      <span>Reports</span>
+    </a>
+
+    <a routerLink="/admin/sales" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">💰</span>
+      <span>Sales</span>
+    </a>
+
+    <a routerLink="/admin/purchase" routerLinkActive="active" (click)="closeMobileSidebar()">
+      <span class="icon">📦</span>
+      <span>Purchase</span>
+    </a>
+  </nav>
+
+  <button class="logout" (click)="logout()">
+    <span class="icon">🚪</span>
+    <span>Logout</span>
+  </button>
+</aside>

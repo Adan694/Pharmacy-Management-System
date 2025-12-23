@@ -1,0 +1,283 @@
+/* Reset and font */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Body background fallback */
+body {
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: #121212;
+    /* fallback color */
+}
+
+/* Animated gradient background applied to the background container */
+/* Animated gradient background - smooth and continuous */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(270deg, #ff6b6b, #fbc531, #4cd137, #ff6b6b);
+    background-size: 800% 800%;
+    animation: gradientFlow 60s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+/* Orbs */
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px) brightness(1.3);
+    opacity: 0.35;
+    animation: float 25s infinite linear;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #ff6b6b, transparent);
+    top: 10%;
+    left: 10%;
+}
+
+.orb-2 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #fbc531, transparent);
+    top: 60%;
+    right: 15%;
+}
+
+.orb-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, #4cd137, transparent);
+    bottom: 10%;
+    left: 20%;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(30px, 30px) rotate(90deg);
+    }
+
+    50% {
+        transform: translate(0, 60px) rotate(180deg);
+    }
+
+    75% {
+        transform: translate(-30px, 30px) rotate(270deg);
+    }
+}
+
+/* Particles */
+.particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    animation: particleMove 15s infinite linear;
+}
+
+@keyframes particleMove {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    10%,
+    90% {
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Login container */
+.login-container {
+    position: fixed;
+    top: 160px;
+    left: 500px;
+    width: 400px;
+    z-index: 100;
+}
+
+/* Glassmorphism card */
+.login-card {
+    position: relative;
+    background: rgba(20, 20, 20, 0.85);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 50px 40px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 400px;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-card h2 {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-align: left;
+    position: relative;
+    padding-bottom: 12px;
+}
+
+.login-card h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, #ff6b6b, #fbc531, #4cd137);
+    border-radius: 3px;
+}
+
+/* Inputs */
+.input-group {
+    position: relative;
+}
+
+.input-group .icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    outline: none;
+    font-size: 15px;
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.input-group input:focus {
+    border-color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 6px rgba(255, 107, 107, 0.3);
+}
+
+/* Button */
+.login-card button {
+    background: linear-gradient(135deg, #ff6b6b, #fbc531);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+}
+
+.login-card button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.login-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Floating card animation */
+@keyframes floatCard {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Pharmacy icon */
+.pharmacy-icon {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff6b6b, #fbc531);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.pharmacy-icon i {
+    font-size: 24px;
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width:768px) {
+    .login-container {
+        position: relative;
+        top: 30px;
+        left: 30px;
+        width: calc(100%-60px);
+        max-width: 400px;
+    }
+
+    .orb-1,
+    .orb-2,
+    .orb-3 {
+        display: none;
+    }
+}

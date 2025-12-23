@@ -1,0 +1,256 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard purchase-reports">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading purchase data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <h3>Unable to load data</h3>
+    </div>
+    <p>{{ errorMessage }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !errorMessage" class="dashboard-content">
+    <div class="header-section">
+      <div>
+        <h1>Purchase Reports</h1>
+        <p class="subtitle">Track and manage purchase orders</p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <!-- Total Orders -->
+        <div class="summary-card">
+          <div class="summary-icon">📦</div>
+          <div>
+            <div class="summary-label">Total Orders</div>
+            <div class="summary-value">{{ summary.totalOrdersCount }} orders</div>
+          </div>
+        </div>
+
+        <!-- Total Purchase Amount -->
+        <div class="summary-card">
+          <div class="summary-icon">💰</div>
+          <div>
+            <div class="summary-label">Total Purchase Amount</div>
+            <div class="summary-value">{{ summary.totalPurchasesAmount | currency }}</div>
+          </div>
+        </div>
+
+        <!-- Current View Summary -->
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div>
+            <div class="summary-label">Current View</div>
+            <div class="summary-value">
+              {{ purchases.length }} orders ({{ getPurchasesTotal() | currency }})
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <canvas #purchaseChart></canvas>
+        <div class="chart-controls">
+          <button (click)="changeChartView('monthly')">Monthly</button>
+          <button (click)="changeChartView('yearly')">Yearly</button>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="panel filters-panel">
+        <div class="panel-header">
+          <h3>Filters & Controls</h3>
+          <div class="filter-actions">
+            <button class="btn secondary" (click)="resetFilters()" [disabled]="applyingFilters">
+              Clear Filters
+            </button>
+            <div *ngIf="applyingFilters" class="filter-loading">
+              <div class="spinner-small"></div>
+              Applying...
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              [(ngModel)]="filters.startDate"
+              placeholder="Start Date"
+              [max]="today"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              type="date"
+              [(ngModel)]="filters.endDate"
+              placeholder="End Date"
+              [min]="filters.startDate"
+              [max]="today"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="search">Search</label>
+            <input
+              id="search"
+              type="text"
+              [(ngModel)]="filters.search"
+              placeholder="Search order, supplier, or medicine..."
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="supplier">Supplier</label>
+            <input
+              id="supplier"
+              type="text"
+              [(ngModel)]="filters.supplier"
+              placeholder="Supplier name"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="form-group action-buttons">
+            <button class="btn primary" (click)="applyFilters()" [disabled]="applyingFilters">
+              <span *ngIf="!applyingFilters">Apply Filters</span>
+              <span *ngIf="applyingFilters" class="btn-loading">
+                <div class="spinner-small"></div>
+              </span>
+            </button>
+            <button
+              class="btn success"
+              (click)="exportData()"
+              [disabled]="exportingData || purchases.length === 0"
+            >
+              <span *ngIf="!exportingData">
+                <span class="btn-icon">📥</span> Export Purchases
+              </span>
+              <span *ngIf="exportingData" class="btn-loading">
+                <div class="spinner-small"></div>
+                Exporting...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Purchases Table -->
+      <div class="panel purchases-table-panel">
+        <div class="panel-header">
+          <h2>Purchase Orders</h2>
+          <div class="table-summary">
+            <span class="summary-item"
+              >Showing {{ purchases.length }} of {{ totalRecords }} records</span
+            >
+            <span class="summary-item">Total Cost: {{ getPurchasesTotal() | currency }}</span>
+            <span class="summary-item">Avg. Cost: {{ getAveragePurchase() | currency }}</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Medicine</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Total Cost</th>
+                <th>Status</th>
+                <th>Payment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading State -->
+              <tr *ngIf="purchasesLoading">
+                <td colspan="9" class="loading-row">
+                  <div class="row-loader"></div>
+                  Loading purchase data...
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="!purchasesLoading && purchases.length === 0">
+                <td colspan="9" class="empty-row">
+                  <div *ngIf="hasActiveFilters()">
+                    No purchases found for the selected filters. Try different criteria.
+                  </div>
+                  <div *ngIf="!hasActiveFilters()">
+                    No purchase records available. Create your first purchase order.
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Purchases Data -->
+              <tr *ngFor="let p of purchases">
+                <td>
+                  <span class="order-badge">{{ p.orderNumber || 'N/A' }}</span>
+                </td>
+                <td>{{ (p.date | date : 'shortDate') || 'N/A' }}</td>
+                <td>{{ p.supplier || 'N/A' }}</td>
+                <td>{{ p.medicine || 'N/A' }}</td>
+                <td class="quantity-cell">{{ p.quantity || 0 }}</td>
+                <td>{{ (p.unitCost | currency) || '$0.00' }}</td>
+                <td class="amount-cell">{{ (p.totalCost | currency) || '$0.00' }}</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.pending]="p.status === 'Pending'"
+                    [class.received]="p.status === 'Received'"
+                    [class.partial]="p.status === 'Partial'"
+                    [class.cancelled]="p.status === 'Cancelled'"
+                  >
+                    {{ p.status || 'Pending' }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="payment-status"
+                    [class.paid]="p.paymentStatus === 'Paid'"
+                    [class.pending]="p.paymentStatus === 'Pending'"
+                    [class.overdue]="p.paymentStatus === 'Overdue'"
+                  >
+                    {{ p.paymentStatus || 'Pending' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="purchases.length > 0 && totalPages > 1" class="pagination">
+          <button class="btn secondary" (click)="prevPage()" [disabled]="currentPage === 1">
+            Previous
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalRecords }} total records)</span>
+          <button
+            class="btn secondary"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

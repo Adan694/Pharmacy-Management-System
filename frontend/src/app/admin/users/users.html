@@ -1,0 +1,280 @@
+<app-sidebar></app-sidebar>
+
+<div class="admin-dashboard user-management">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading user data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <h3>Unable to load data</h3>
+    </div>
+    <p>{{ error }}</p>
+    <button (click)="retryLoadData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <div class="header-section">
+      <div>
+        <h1>User Management</h1>
+        <p class="subtitle">Create and manage system users</p>
+      </div>
+      <div class="header-actions">
+        <div class="header-stats">
+          <span class="stat-badge">
+            <span class="stat-label">Total Users:</span>
+            <span class="stat-value">{{ totalUsers }}</span>
+          </span>
+          <span class="stat-badge">
+            <span class="stat-label">Active:</span>
+            <span class="stat-value active">{{ activeUsers }}</span>
+          </span>
+          <span class="stat-badge">
+            <span class="stat-label">Inactive:</span>
+            <span class="stat-value inactive">{{ inactiveUsers }}</span>
+          </span>
+        </div>
+        <button class="btn primary" (click)="openCreateModal()">
+          <span class="btn-icon">+</span> Create New User
+        </button>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>System Users</h2>
+        <div class="table-actions">
+          <input
+            type="text"
+            placeholder="Search users..."
+            class="search-input"
+            [(ngModel)]="searchTerm"
+            (input)="filterUsers()"
+          />
+          <div *ngIf="tableLoading" class="table-loading">Loading users...</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Loading State -->
+            <tr *ngIf="tableLoading">
+              <td colspan="5" class="loading-row">
+                <div class="row-loader"></div>
+                Loading users...
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="!tableLoading && filteredUsers.length === 0">
+              <td colspan="5" class="empty-row">
+                <div *ngIf="searchTerm">No users found for "{{ searchTerm }}"</div>
+                <div *ngIf="!searchTerm">No users available</div>
+              </td>
+            </tr>
+
+            <!-- Users Data -->
+            <tr *ngFor="let u of filteredUsers">
+              <td>
+                <div class="user-info">
+                  <span class="user-name">{{ u.name }}</span>
+                  <span *ngIf="u.lastLogin" class="last-login">
+                    Last login: {{ u.lastLogin | date : 'shortDate' }}
+                  </span>
+                </div>
+              </td>
+              <td>{{ u.email }}</td>
+              <td>
+                <span
+                  class="role-badge"
+                  [class.role-pharmacist]="u.role === 'Pharmacist'"
+                  [class.role-cashier]="u.role === 'Cashier'"
+                  [class.role-admin]="u.role === 'Admin'"
+                >
+                  {{ u.role }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.active]="u.isActive"
+                  [class.inactive]="!u.isActive"
+                >
+                  {{ u.isActive ? 'Active' : 'Disabled' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button
+                  class="btn danger"
+                  *ngIf="u.isActive"
+                  (click)="toggleStatus(u.id)"
+                  [disabled]="togglingUserId === u.id"
+                >
+                  <span *ngIf="togglingUserId !== u.id">Disable</span>
+                  <span *ngIf="togglingUserId === u.id" class="btn-loading">
+                    <div class="spinner-small"></div>
+                  </span>
+                </button>
+                <button
+                  class="btn success"
+                  *ngIf="!u.isActive"
+                  (click)="toggleStatus(u.id)"
+                  [disabled]="togglingUserId === u.id"
+                >
+                  <span *ngIf="togglingUserId !== u.id">Activate</span>
+                  <span *ngIf="togglingUserId === u.id" class="btn-loading">
+                    <div class="spinner-small"></div>
+                  </span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="filteredUsers.length > 0" class="pagination">
+        <button class="btn secondary" (click)="prevPage()" [disabled]="currentPage === 1">
+          Previous
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="btn secondary" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div *ngIf="showCreateModal" class="modal-overlay" (click)="closeModalOnOverlay($event)">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>Create New User</h2>
+        <button class="modal-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="createUser()" #userForm="ngForm" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="modalName">Full Name *</label>
+              <input
+                id="modalName"
+                placeholder="Enter full name"
+                [(ngModel)]="user.name"
+                name="modalName"
+                required
+                [disabled]="creatingUser"
+              />
+              <div class="form-hint">User's full name</div>
+            </div>
+
+            <div class="form-group">
+              <label for="modalEmail">Email Address *</label>
+              <input
+                id="modalEmail"
+                type="email"
+                placeholder="Enter email address"
+                [(ngModel)]="user.email"
+                name="modalEmail"
+                required
+                [disabled]="creatingUser"
+              />
+              <div class="form-hint">Must be a valid email</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="modalPassword">Password *</label>
+              <div class="password-input-group">
+                <input
+                  id="modalPassword"
+                  [type]="showPassword ? 'text' : 'password'"
+                  placeholder="Enter password"
+                  [(ngModel)]="user.password"
+                  name="modalPassword"
+                  required
+                  minlength="6"
+                  [disabled]="creatingUser"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="togglePasswordVisibility()"
+                  [disabled]="creatingUser"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  <span *ngIf="!showPassword">👁️</span>
+                  <span *ngIf="showPassword">🙈</span>
+                </button>
+              </div>
+              <div class="form-hint">Minimum 6 characters</div>
+            </div>
+
+            <div class="form-group">
+              <label for="modalRole">User Role *</label>
+              <select
+                id="modalRole"
+                [(ngModel)]="user.role"
+                name="modalRole"
+                required
+                [disabled]="creatingUser"
+                class="role-select"
+              >
+                <option value="">Select role</option>
+                <option value="Pharmacist">Pharmacist</option>
+                <option value="Cashier">Cashier</option>
+                <option value="Admin">Admin</option>
+              </select>
+              <div class="form-hint">User's system role</div>
+            </div>
+          </div>
+
+          <div class="password-strength" *ngIf="user.password">
+            <div class="strength-label">Password strength:</div>
+            <div class="strength-meter">
+              <div class="strength-bar" [class]="getPasswordStrengthClass()"></div>
+            </div>
+            <div class="strength-text">{{ getPasswordStrengthText() }}</div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="closeCreateModal()"
+              [disabled]="creatingUser"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn primary" [disabled]="!userForm.valid || creatingUser">
+              <span *ngIf="!creatingUser"> <span class="btn-icon">+</span> Create User </span>
+              <span *ngIf="creatingUser" class="btn-loading">
+                <div class="spinner-small"></div>
+                Creating...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
