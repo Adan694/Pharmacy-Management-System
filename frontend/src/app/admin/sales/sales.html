@@ -30,7 +30,10 @@
           <div>
             <div class="summary-label">Today's Sales</div>
             <div class="summary-value">
-              {{ summary.todaySalesAmount | currency }} ({{ summary.todaySalesCount }} orders)
+              PKR {{ summary.todaySalesAmount | number : '1.0-0' }} ({{
+                summary.todaySalesCount
+              }}
+              orders)
             </div>
           </div>
         </div>
@@ -39,7 +42,7 @@
           <div class="summary-icon">📊</div>
           <div>
             <div class="summary-label">This Month Sales</div>
-            <div class="summary-value">{{ summary.monthSalesAmount | currency }}</div>
+            <div class="summary-value">PKR {{ summary.monthSalesAmount | number : '1.0-0' }}</div>
           </div>
         </div>
 
@@ -48,11 +51,12 @@
           <div>
             <div class="summary-label">Current View</div>
             <div class="summary-value">
-              {{ sales.length }} sales ({{ getSalesTotal() | currency }})
+              {{ sales.length }} sales (PKR {{ getSalesTotal() | number : '1.0-0' }})
             </div>
           </div>
         </div>
       </div>
+
       <div class="panel-header">
         <h2>Sales Overview</h2>
 
@@ -142,9 +146,9 @@
           <div class="form-group action-buttons">
             <button class="btn primary" (click)="applyFilters()" [disabled]="applyingFilters">
               <span *ngIf="!applyingFilters">Apply Filters</span>
-              <span *ngIf="applyingFilters" class="btn-loading"
-                ><div class="spinner-small"></div
-              ></span>
+              <span *ngIf="applyingFilters" class="btn-loading">
+                <div class="spinner-small"></div>
+              </span>
             </button>
             <button
               class="btn success"
@@ -152,10 +156,10 @@
               [disabled]="exportingData || sales.length === 0"
             >
               <span *ngIf="!exportingData">📥 Export Sales</span>
-              <span *ngIf="exportingData" class="btn-loading"
-                ><div class="spinner-small"></div>
-                Exporting...</span
-              >
+              <span *ngIf="exportingData" class="btn-loading">
+                <div class="spinner-small"></div>
+                Exporting...
+              </span>
             </button>
           </div>
         </div>
@@ -167,8 +171,8 @@
           <h2>Sales Transactions</h2>
           <div class="table-summary">
             <span>Showing {{ sales.length }} of {{ totalRecords }} records</span>
-            <span>Total Amount: {{ getSalesTotal() | currency }}</span>
-            <span>Average Sale: {{ getAverageSale() | currency }}</span>
+            <span>Total Amount: PKR {{ getSalesTotal() | number : '1.0-0' }}</span>
+            <span>Average Sale: PKR {{ getAverageSale() | number : '1.0-0' }}</span>
           </div>
         </div>
 
@@ -200,8 +204,8 @@
                 <td>{{ s.customer || 'Walk-in Customer' }}</td>
                 <td>{{ s.product || 'N/A' }}</td>
                 <td>{{ s.quantity || 0 }}</td>
-                <td>{{ s.unitPrice | currency }}</td>
-                <td>{{ s.total | currency }}</td>
+                <td>PKR {{ s.unitPrice | number : '1.0-0' }}</td>
+                <td>PKR {{ s.total | number : '1.0-0' }}</td>
                 <td>{{ s.cashier || 'N/A' }}</td>
                 <td>{{ s.paymentMethod || 'Cash' }}</td>
               </tr>

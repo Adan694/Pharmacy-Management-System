@@ -1,0 +1,69 @@
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<div class="pharmacist-dashboard">
+  <h1>Dashboard</h1>
+  <p class="subtitle">Medicine safety & inventory overview</p>
+
+  <!-- STAT CARDS -->
+  <div class="cards-grid">
+    <div class="stat-card healthy">
+      <div class="icon">🧪</div>
+      <div>
+        <div class="label">Total Medicines</div>
+        <div class="value">{{ stats.totalMedicines }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card warning" [class.active]="stats.lowStock > 0">
+      <div class="icon">📉</div>
+      <div>
+        <div class="label">Low Stock</div>
+        <div class="value">{{ stats.lowStock }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card danger" [class.active]="stats.expired > 0">
+      <div class="icon">⛔</div>
+      <div>
+        <div class="label">Expired</div>
+        <div class="value">{{ stats.expired }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card info" [class.active]="stats.nearExpiry > 0">
+      <div class="icon">⏳</div>
+      <div>
+        <div class="label">Near Expiry (30 days)</div>
+        <div class="value">{{ stats.nearExpiry }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIE CHART -->
+  <div class="chart-section">
+    <h2>Inventory Overview</h2>
+    <canvas id="inventoryChart"></canvas>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alerts-section">
+    <h2>Urgent Alerts</h2>
+    <ul *ngIf="lowStockMeds.length || expiredMeds.length; else noAlerts">
+      <li *ngFor="let med of lowStockMeds">⚠️ {{ med.name }} is low on stock!</li>
+      <li *ngFor="let med of expiredMeds">⛔ {{ med.name }} has expired!</li>
+    </ul>
+    <ng-template #noAlerts>
+      <p>No urgent alerts. Inventory is healthy ✅</p>
+    </ng-template>
+  </div>
+
+  <!-- RECENT UPDATES -->
+  <div class="recent-updates">
+    <h2>Recent Inventory Updates</h2>
+    <ul>
+      <li *ngFor="let med of recentUpdates">
+        {{ med.name }} — updated on {{ med.updatedAt | date : 'short' }}
+      </li>
+    </ul>
+  </div>
+</div>

@@ -111,4 +111,6 @@ export class Sidebar implements OnInit {
       this.isSidebarOpen = false;
     }
   }
+
+  
 }

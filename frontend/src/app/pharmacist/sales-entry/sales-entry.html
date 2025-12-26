@@ -1,0 +1,389 @@
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<div class="sales-container">
+  <header class="page-header">
+    <h1 id="page-title">New Sale Transaction</h1>
+    <p class="page-subtitle">Record customer purchases and update inventory</p>
+  </header>
+
+  <div class="sales-layout">
+    <!-- Left Panel: Sale Form -->
+    <div class="panel sale-form">
+      <header class="panel-header">
+        <h2>Sale Details</h2>
+        <div class="form-stats">
+          <span class="stat-item">Required fields marked *</span>
+        </div>
+      </header>
+
+      <form (ngSubmit)="submitSale()" #saleForm="ngForm">
+        <!-- Customer Information -->
+        <div class="form-section">
+          <h3 class="section-title"><span class="section-icon">👤</span> Customer Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customerName">Customer Name</label>
+              <input
+                id="customerName"
+                type="text"
+                [(ngModel)]="customerName"
+                name="customerName"
+                placeholder="Walk-in customer"
+                class="customer-input"
+              />
+              <small class="hint">Leave empty for walk-in customers</small>
+            </div>
+
+            <div class="form-group">
+              <label for="customerContact">Contact (Optional)</label>
+              <input
+                id="customerContact"
+                type="tel"
+                [(ngModel)]="customerContact"
+                name="customerContact"
+                placeholder="Phone number"
+                class="customer-input"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Medicine Selection -->
+        <div class="form-section">
+          <h3 class="section-title"><span class="section-icon">💊</span> Medicine Details</h3>
+
+          <div class="medicine-search">
+            <div class="form-group">
+              <label for="medicineSelect" class="required">Select Medicine *</label>
+              <div class="select-wrapper">
+                <select
+                  id="medicineSelect"
+                  [(ngModel)]="selectedMedicine"
+                  name="medicineSelect"
+                  (change)="onMedicineSelect()"
+                  required
+                  class="medicine-select"
+                >
+                  <option [ngValue]="null" disabled selected>Search or select medicine...</option>
+                  <option *ngFor="let m of medicines" [ngValue]="m">
+                    {{ m.name }} - {{ m.brand || 'Generic' }} | Stock: {{ m.quantity }} | ₨{{
+                      m.price
+                    }}
+                  </option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+            </div>
+
+            <!-- Medicine Details Card -->
+            <div class="medicine-card" *ngIf="selectedMedicine">
+              <div class="medicine-card-header">
+                <h4>{{ selectedMedicine.name }}</h4>
+                <span class="category-badge">{{ selectedMedicine.category || 'General' }}</span>
+              </div>
+              <div class="medicine-details">
+                <div class="detail-item">
+                  <span class="detail-label">Brand:</span>
+                  <span class="detail-value">{{ selectedMedicine.brand || 'Generic' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Available Stock:</span>
+                  <span class="detail-value stock-count">{{ selectedMedicine.quantity }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Unit Price:</span>
+                  <span class="detail-value price-tag"
+                    >₨{{ selectedMedicine.price | number : '1.0-0' }}</span
+                  >
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Expiry:</span>
+                  <span class="detail-value" [class.expired]="isExpired(selectedMedicine)">
+                    {{ selectedMedicine.expiryDate || 'N/A' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quantity & Price -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quantity" class="required">Quantity *</label>
+              <div class="quantity-control">
+                <button type="button" class="quantity-btn minus" (click)="decreaseQuantity()">
+                  −
+                </button>
+                <input
+                  id="quantity"
+                  type="number"
+                  [(ngModel)]="quantity"
+                  name="quantity"
+                  min="1"
+                  [max]="getAvailableStock()"
+                  required
+                  (input)="calculateTotal()"
+                  class="quantity-input"
+                />
+                <button type="button" class="quantity-btn plus" (click)="increaseQuantity()">
+                  +
+                </button>
+              </div>
+              <small class="hint">
+                Available: <strong>{{ getAvailableStock() }}</strong> units
+                <span *ngIf="quantity > getAvailableStock()" class="stock-warning">
+                  ⚠️ Exceeds available stock
+                </span>
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="price" class="required">Unit Price *</label>
+              <div class="input-with-icon">
+                <span class="input-prefix">₨</span>
+                <input
+                  id="price"
+                  type="number"
+                  [(ngModel)]="price"
+                  name="price"
+                  min="0"
+                  step="1"
+                  required
+                  (input)="calculateTotal()"
+                  class="price-input"
+                  [class.price-adjusted]="price !== getSelectedPrice()"
+                />
+              </div>
+              <small class="hint">
+                Original: ₨{{ getSelectedPrice() | number : '1.0-0' }}
+                <span *ngIf="price !== getSelectedPrice()" class="price-change">
+                  ({{ price > getSelectedPrice() ? 'Increased' : 'Discounted' }})
+                </span>
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment & Additional Info -->
+        <div class="form-section">
+          <h3 class="section-title"><span class="section-icon">💳</span> Payment Information</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paymentMethod" class="required">Payment Method *</label>
+              <div class="payment-methods">
+                <div class="method-options">
+                  <label class="method-option" [class.selected]="paymentType === 'Cash'">
+                    <input
+                      type="radio"
+                      [(ngModel)]="paymentType"
+                      name="paymentType"
+                      value="Cash"
+                      required
+                    />
+                    <span class="method-icon">💵</span>
+                    <span class="method-label">Cash</span>
+                  </label>
+
+                  <label class="method-option" [class.selected]="paymentType === 'Card'">
+                    <input type="radio" [(ngModel)]="paymentType" name="paymentType" value="Card" />
+                    <span class="method-icon">💳</span>
+                    <span class="method-label">Card</span>
+                  </label>
+
+                  <label class="method-option" [class.selected]="paymentType === 'UPI'">
+                    <input type="radio" [(ngModel)]="paymentType" name="paymentType" value="UPI" />
+                    <span class="method-icon">📱</span>
+                    <span class="method-label">UPI</span>
+                  </label>
+
+                  <label class="method-option" [class.selected]="paymentType === 'Insurance'">
+                    <input
+                      type="radio"
+                      [(ngModel)]="paymentType"
+                      name="paymentType"
+                      value="Insurance"
+                    />
+                    <span class="method-icon">🏥</span>
+                    <span class="method-label">Insurance</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="discount">Discount (₨)</label>
+              <div class="input-with-icon">
+                <span class="input-prefix">-₨ </span>
+                <input
+                  id="discount"
+                  type="number"
+                  [(ngModel)]="discount"
+                  name="discount"
+                  min="0"
+                  max="{{ calculateTotal() }}"
+                  step="1"
+                  (input)="calculateFinalAmount()"
+                  class="discount-input"
+                />
+              </div>
+              <small class="hint">Optional discount amount</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn secondary" (click)="resetForm()">
+            <span class="btn-icon">🔄</span> Clear All
+          </button>
+          <button type="submit" class="btn primary" [disabled]="loading || !isFormValid()">
+            <span *ngIf="!loading" class="btn-icon">💾</span>
+            <span *ngIf="loading" class="spinner-small"></span>
+            {{ loading ? 'Processing Sale...' : 'Complete Sale' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Panel: Sale Summary -->
+    <div class="panel sale-summary">
+      <header class="panel-header">
+        <h2>Sale Summary</h2>
+        <div class="receipt-number">Receipt #{{ generateReceiptNumber() }}</div>
+      </header>
+
+      <div class="summary-content">
+        <!-- Order Summary -->
+        <div class="summary-section">
+          <h3 class="summary-title">Order Summary</h3>
+
+          <div class="summary-items">
+            <div class="summary-item">
+              <span>Medicine</span>
+              <span class="item-value">{{ selectedMedicine?.name || 'Not selected' }}</span>
+            </div>
+
+            <div class="summary-item">
+              <span>Quantity</span>
+              <span class="item-value">{{ quantity || 0 }} units</span>
+            </div>
+
+            <div class="summary-item">
+              <span>Unit Price</span>
+              <span class="item-value">₨ {{ price | number : '1.0-0' }}</span>
+            </div>
+
+            <div class="summary-item" *ngIf="discount > 0">
+              <span>Discount</span>
+              <span class="item-value discount-amount">-₨ {{ discount | number : '1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="totals-section">
+          <div class="total-row subtotal">
+            <span>Subtotal</span>
+            <span>₨ {{ calculateSubtotal() | number : '1.0-0' }}</span>
+          </div>
+
+          <div class="total-row discount-row" *ngIf="discount > 0">
+            <span>Discount</span>
+            <span>-₨ {{ discount | number : '1.0-0' }}</span>
+          </div>
+
+          <div class="total-row grand-total">
+            <span>Total Amount</span>
+            <strong>₨ {{ calculateFinalAmount() | number : '1.0-0' }}</strong>
+          </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="payment-summary">
+          <div class="payment-item">
+            <span>Payment Method</span>
+            <span class="payment-badge" [class]="paymentType?.toLowerCase()">
+              {{ paymentType || 'Not selected' }}
+            </span>
+          </div>
+
+          <div class="payment-item">
+            <span>Customer</span>
+            <span class="customer-name">{{ customerName || 'Walk-in Customer' }}</span>
+          </div>
+
+          <div class="payment-item">
+            <span>Time</span>
+            <span class="sale-time">{{ currentTime | date : 'mediumTime' }}</span>
+          </div>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="stock-status" *ngIf="selectedMedicine">
+          <div class="status-header">
+            <h4>Stock After Sale</h4>
+            <span class="stock-change" [class.low]="getRemainingStock() < 10">
+              {{ getRemainingStock() }} units
+            </span>
+          </div>
+          <div class="stock-bar">
+            <div class="stock-fill" [style.width.%]="getStockPercentage()"></div>
+          </div>
+          <small class="hint">
+            {{ getStockStatusMessage() }}
+          </small>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button
+          class="btn secondary print-btn"
+          (click)="printReceipt()"
+          [disabled]="!selectedMedicine"
+        >
+          <span class="btn-icon">🖨️</span> Print Receipt
+        </button>
+        <button class="btn secondary add-another" (click)="addAnotherItem()">
+          <span class="btn-icon">➕</span> Add Another Item
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Sales -->
+  <div class="panel recent-sales" *ngIf="recentSales.length > 0">
+    <header class="panel-header">
+      <h2>Recent Sales</h2>
+      <div class="table-info">Last {{ recentSales.length }} transactions</div>
+    </header>
+
+    <div class="sales-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Medicine</th>
+            <th>Qty</th>
+            <th>Amount</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sale of recentSales">
+            <td>{{ sale.time | date : 'shortTime' }}</td>
+            <td class="medicine-cell">{{ sale.medicine }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td class="amount-cell">₨ {{ sale.amount | number : '1.0-0' }}</td>
+            <td>
+              <span class="payment-badge small">{{ sale.payment }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<app-toast #toast></app-toast>

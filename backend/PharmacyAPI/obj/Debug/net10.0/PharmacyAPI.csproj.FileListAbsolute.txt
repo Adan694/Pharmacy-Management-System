@@ -167,3 +167,4 @@ E:\Pharmacy Management System\backend\PharmacyAPI\bin\Debug\net10.0\runtimes\win
 E:\Pharmacy Management System\backend\PharmacyAPI\bin\Debug\net10.0\runtimes\win\lib\net9.0\System.Windows.Extensions.dll
 E:\Pharmacy Management System\backend\PharmacyAPI\bin\Debug\net10.0\BCrypt.Net-Next.dll
 E:\Pharmacy Management System\backend\PharmacyAPI\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\Pharmacy Management System\backend\PharmacyAPI\obj\Debug\net10.0\PharmacyAPI.sourcelink.json

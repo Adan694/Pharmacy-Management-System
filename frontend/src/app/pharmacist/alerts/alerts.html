@@ -1,0 +1,65 @@
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<div class="pharmacist-alerts">
+  <h1>Medicine Alerts</h1>
+  <p class="subtitle">Stay on top of expired, near-expiry, and low-stock medicines</p>
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="filter-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
+      All
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="currentFilter === 'expired'"
+      (click)="setFilter('expired')"
+    >
+      Expired
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="currentFilter === 'nearExpiry'"
+      (click)="setFilter('nearExpiry')"
+    >
+      Near Expiry
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="currentFilter === 'lowStock'"
+      (click)="setFilter('lowStock')"
+    >
+      Low Stock
+    </button>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="filteredAlerts.length === 0" class="empty-state">
+    <div class="empty-icon">✅</div>
+    <h3>No Alerts Found</h3>
+    <p>All medicines are in safe stock and expiry limits.</p>
+  </div>
+
+  <!-- Alerts List -->
+  <div *ngIf="filteredAlerts.length > 0" class="alerts-container">
+    <div *ngFor="let alert of filteredAlerts" class="alert-card" [ngClass]="alert.type">
+      <div class="alert-icon">
+        <span *ngIf="alert.type === 'expired'">⚠️</span>
+        <span *ngIf="alert.type === 'nearExpiry'">⏳</span>
+        <span *ngIf="alert.type === 'lowStock'">📉</span>
+      </div>
+      <div class="alert-content">
+        <h4>
+          {{ alert.name }} <small *ngIf="alert.brand">• {{ alert.brand }}</small>
+        </h4>
+        <p class="alert-message">{{ alert.message }}</p>
+        <span class="alert-meta">
+          <span *ngIf="alert.type === 'expired' || alert.type === 'nearExpiry'"
+            >Expiry: {{ formatDate(alert.expiryDate) }}</span
+          >
+          <span *ngIf="alert.type === 'lowStock'">Stock: {{ alert.quantity }}</span>
+        </span>
+      </div>
+      <button class="btn dismiss-btn" (click)="dismissAlert(alert.id)">Dismiss</button>
+    </div>
+  </div>
+</div>

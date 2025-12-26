@@ -1,0 +1,46 @@
+<aside class="pharmacist-sidebar">
+  <div class="brand">
+    <div class="brand-icon">💊</div>
+    <div class="brand-text">
+      <h2>Pharmacist</h2>
+      <span>Panel</span>
+    </div>
+  </div>
+
+  <nav class="menu">
+    <a routerLink="/pharmacist" routerLinkActive="active">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a routerLink="/pharmacist/inventory" routerLinkActive="active">
+      <span class="icon">🧪</span>
+      <span>Inventory</span>
+    </a>
+
+    <a routerLink="/pharmacist/alerts" routerLinkActive="active">
+      <span class="icon">⚠️</span>
+      <span>Alerts</span>
+    </a>
+
+    <a routerLink="/pharmacist/sales" routerLinkActive="active">
+      <span class="icon">💰</span>
+      <span>Sales Report</span>
+    </a>
+    <a routerLink="/pharmacist/sales-entry" routerLinkActive="active">
+      <span class="icon">🛒</span>
+      <span>Sales Entry</span>
+    </a>
+    <a routerLink="/pharmacist/purchase" routerLinkActive="active">
+      <span class="icon">📦</span>
+      <span>Purchase</span>
+    </a>
+
+    <div class="divider"></div>
+
+    <a (click)="logout()" class="logout">
+      <span class="icon">🚪</span>
+      <span>Logout</span>
+    </a>
+  </nav>
+</aside>

@@ -1,0 +1,168 @@
+.pharmacist-alerts {
+    margin-left: 250px;
+    padding: 40px;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f4f9fb 0%, #edf7fa 100%);
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a2b3c;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #5d7a8c;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+/* Filters */
+.filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    padding: 8px 18px;
+    border-radius: 12px;
+    border: 1px solid #d1d9e6;
+    background: #eef2f7;
+    color: #5d7a8c;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Alerts Container */
+.alerts-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+/* Alert Card */
+.alert-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alert-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.alert-icon {
+    font-size: 28px;
+    margin-right: 20px;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a2b3c;
+}
+
+.alert-content h4 small {
+    font-weight: 400;
+    color: #6b8a92;
+}
+
+.alert-message {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #4a6572;
+}
+
+.alert-meta {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.dismiss-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+    border: none;
+    background: #e53935;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dismiss-btn:hover {
+    background: #c62828;
+}
+
+/* Alert Types */
+.alert-card.expired {
+    border-left: 6px solid #e53935;
+}
+
+.alert-card.nearExpiry {
+    border-left: 6px solid #ff9800;
+}
+
+.alert-card.lowStock {
+    border-left: 6px solid #009688;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 115, 170, 0.08);
+    margin-top: 40px;
+}
+
+.empty-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .pharmacist-alerts {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .alerts-container {
+        grid-template-columns: 1fr;
+    }
+}

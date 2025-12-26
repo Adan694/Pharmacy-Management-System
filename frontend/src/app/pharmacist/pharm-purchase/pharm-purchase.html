@@ -1,0 +1,452 @@
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<main class="purchases-container" role="main">
+  <header class="page-header">
+    <h1 id="page-title">Purchase Medicines</h1>
+    <p class="page-subtitle">Manage medicine purchases and inventory</p>
+  </header>
+
+  <!-- Purchase Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <span class="card-value">{{ getTotalPurchases() }}</span>
+        <span class="card-label">Total Purchases</span>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">💰</div>
+      <div class="card-content">
+        <span class="card-value">PKR {{ getTotalCost() | number : '1.0-0' }}</span>
+        <span class="card-label">Total Spent</span>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">⏳</div>
+      <div class="card-content">
+        <span class="card-value">{{ getPendingCount() }}</span>
+        <span class="card-label">Pending Orders</span>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">✅</div>
+      <div class="card-content">
+        <span class="card-value">{{ getReceivedCount() }}</span>
+        <span class="card-label">Received</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Purchase Form -->
+  <section class="panel purchase-form" aria-labelledby="add-purchase-heading">
+    <header class="panel-header">
+      <div>
+        <h2 id="add-purchase-heading">Add New Purchase</h2>
+        <p class="panel-subtitle">Create new medicine purchase orders</p>
+      </div>
+      <div class="form-stats">
+        <span class="stat-item">Fill all required fields</span>
+        <span class="stat-item ok">Auto-calculated total</span>
+      </div>
+    </header>
+
+    <form (ngSubmit)="addPurchase()" id="purchase-form" aria-label="Purchase form">
+      <div class="form-grid">
+        <!-- Supplier Name -->
+        <div class="form-group">
+          <label for="supplier" class="required">Supplier Name</label>
+          <input
+            id="supplier"
+            type="text"
+            [(ngModel)]="newPurchase.supplier"
+            name="supplier"
+            placeholder="Enter supplier company name"
+            required
+            aria-required="true"
+          />
+          <small class="hint">Enter the name of the medicine supplier</small>
+        </div>
+
+        <!-- Medicine Selection -->
+        <div class="form-group">
+          <label for="medicine" class="required">Medicine</label>
+          <select
+            id="medicine"
+            [(ngModel)]="newPurchase.medicineId"
+            name="medicine"
+            (change)="onMedicineChange()"
+            required
+            aria-required="true"
+          >
+            <option [value]="0">-- Select Existing Medicine --</option>
+            <option *ngFor="let med of medicines" [value]="med.id">
+              {{ med.name }} ({{ med.quantity }} in stock)
+            </option>
+          </select>
+          <small class="hint">Select an existing medicine or choose 'New Medicine' option</small>
+        </div>
+
+        <!-- New Medicine Input -->
+        <div class="form-group" *ngIf="newPurchase.medicineId == 0">
+          <label for="newMedicine" class="required">New Medicine Name</label>
+          <input
+            id="newMedicine"
+            type="text"
+            [(ngModel)]="newPurchase.medicineName"
+            name="newMedicine"
+            placeholder="Enter new medicine name"
+            required
+            aria-required="true"
+          />
+          <small class="hint">Enter the name of the new medicine to add to inventory</small>
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+          <label for="quantity" class="required">Quantity</label>
+          <input
+            id="quantity"
+            type="number"
+            [(ngModel)]="newPurchase.quantity"
+            name="quantity"
+            (input)="onQuantityChange()"
+            min="1"
+            max="1000"
+            required
+            aria-required="true"
+          />
+          <small class="hint">Minimum quantity: 1 unit, maximum: 1000 units</small>
+        </div>
+
+        <!-- Unit Price -->
+        <div class="form-group">
+          <label for="unitPrice" class="required">Unit Price</label>
+          <div class="input-with-icon">
+            <span class="input-prefix">₨</span>
+            <input
+              id="unitPrice"
+              type="number"
+              [(ngModel)]="newPurchase.unitPrice"
+              name="unitPrice"
+              (input)="onUnitPriceChange()"
+              min="0.01"
+              step="0.01"
+              required
+              aria-required="true"
+              placeholder="Enter unit price"
+            />
+          </div>
+          <small class="hint">Enter price per unit. Will auto-calculate total</small>
+        </div>
+
+        <!-- Total Cost -->
+        <div class="form-group">
+          <label for="totalCost">Total Cost</label>
+          <div class="input-with-icon">
+            <span class="input-prefix">₨</span>
+            <input
+              id="totalCost"
+              type="number"
+              [value]="newPurchase.totalCost"
+              readonly
+              aria-label="Total purchase cost"
+            />
+          </div>
+          <small class="hint"
+            >Calculated automatically: {{ newPurchase.quantity }} × {{ newPurchase.unitPrice }} =
+            {{ newPurchase.totalCost | currency : 'PKR' : 'symbol' : '1.2-2' }}</small
+          >
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" [(ngModel)]="newPurchase.status" name="status">
+            <option value="Pending">Pending</option>
+            <option value="Received">Received</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <small class="hint">Set the current status of this purchase order</small>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group full-width">
+          <label for="notes">Notes (Optional)</label>
+          <textarea
+            id="notes"
+            [(ngModel)]="newPurchase.notes"
+            name="notes"
+            placeholder="Add any notes or comments about this purchase..."
+            rows="3"
+          ></textarea>
+          <small class="hint">Additional information about this purchase</small>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn primary">
+          <span class="btn-icon">➕</span> Add Purchase
+        </button>
+        <button type="button" class="btn secondary" (click)="resetForm()">
+          <span class="btn-icon">🔄</span> Clear Form
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Purchases Table -->
+  <section
+    class="panel purchases-table"
+    *ngIf="purchases.length"
+    aria-labelledby="purchases-heading"
+  >
+    <header class="table-header">
+      <div>
+        <h2 id="purchases-heading">All Purchases</h2>
+        <div class="table-info">
+          Showing {{ purchases.length }} purchase(s)
+          <div class="stats">
+            <span class="stat-item pending">{{ getPendingCount() }} Pending</span>
+            <span class="stat-item received">{{ getReceivedCount() }} Received</span>
+            <span class="stat-item cancelled">{{ getCancelledCount() }} Cancelled</span>
+          </div>
+        </div>
+      </div>
+      <div class="table-controls">
+        <div class="search-box">
+          <input type="search" placeholder="Search purchases..." (input)="onSearch($event)" />
+          <span class="search-icon">🔍</span>
+        </div>
+        <select (change)="onStatusFilter($event)" title="h">
+          <option value="all">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Received">Received</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="table-container" role="region" aria-labelledby="purchases-heading" tabindex="0">
+      <table class="purchases-data-table">
+        <caption class="visually-hidden">
+          List of all medicine purchases with details
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" id="col-order">Order #</th>
+            <th scope="col" id="col-date">Date</th>
+            <th scope="col" id="col-supplier">Supplier</th>
+            <th scope="col" id="col-medicine">Medicine</th>
+            <th scope="col" id="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of getPagedPurchases()"
+            [class.pending-row]="p.status === 'Pending'"
+            [class.received-row]="p.status === 'Received'"
+            [class.cancelled-row]="p.status === 'Cancelled'"
+          >
+            <td headers="col-order" class="order-number">
+              <strong>{{ p.orderNumber }}</strong>
+            </td>
+            <td headers="col-date" class="date-cell">
+              <time [attr.datetime]="p.date">{{ p.date | date : 'mediumDate' }}</time>
+            </td>
+            <td headers="col-supplier" class="supplier-cell">
+              <div class="supplier-name">{{ p.supplier }}</div>
+            </td>
+            <td headers="col-medicine" class="medicine-cell">
+              <div class="medicine-name">
+                <strong>{{ p.medicine }}</strong>
+              </div>
+            </td>
+            <td headers="col-actions" class="actions-cell">
+              <div class="action-buttons">
+                <button (click)="openPurchaseDetails(p)" class="btn view-btn">
+                  <span class="btn-icon">👁️</span> View Details
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="purchases.length > 0">
+          <tr class="summary-row">
+            <td colspan="3" class="summary-label">
+              <strong>Total: {{ purchases.length }} purchase(s)</strong>
+            </td>
+            <td colspan="2" class="summary-meta">
+              <span>{{ getPendingCount() }} pending • {{ getReceivedCount() }} received</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="purchases.length > 0">
+      <div class="pagination-info">
+        Showing {{ getStartIndex() }} - {{ getEndIndex() }} of {{ purchases.length }} purchases
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="pagination-button pagination-nav"
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+        >
+          ← Previous
+        </button>
+
+        <div class="page-numbers">
+          <button
+            *ngFor="let page of getVisiblePages()"
+            class="pagination-button"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+            [disabled]="page === '...'"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          class="pagination-button pagination-nav"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next →
+        </button>
+      </div>
+
+      <div class="page-size-selector">
+        <span>Show:</span>
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" title="j">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span>per page</span>
+      </div>
+    </div>
+
+    <div class="table-footer" *ngIf="purchases.length === 0">
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No purchases yet</h3>
+        <p>Start by adding your first purchase using the form above.</p>
+        <button class="btn primary" (click)="scrollToForm()">
+          <span class="btn-icon">➕</span> Add First Purchase
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- No Purchases Message -->
+  <div class="no-purchases panel" *ngIf="!purchases || purchases.length === 0">
+    <div class="empty-purchases">
+      <div class="empty-icon">📋</div>
+      <h3>No Purchase Records</h3>
+      <p>Add your first purchase to get started with inventory management.</p>
+      <button class="btn primary" (click)="scrollToForm()">
+        <span class="btn-icon">➕</span> Add First Purchase
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- Notification Toast -->
+<div class="toast" *ngIf="showToast" role="alert" aria-live="assertive" [class]="toastType">
+  <span class="toast-icon">{{ toastType === 'success' ? '✅' : '❌' }}</span>
+  <span class="toast-message">{{ toastMessage }}</span>
+  <button class="toast-close" (click)="hideToast()">×</button>
+</div>
+
+<!-- Purchase Details Modal -->
+<div class="modal-overlay" *ngIf="selectedPurchase" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Purchase Details</h3>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-section">
+        <h4>Order Information</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Order #:</span>
+            <span class="detail-value">{{ selectedPurchase.orderNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">{{ selectedPurchase.date | date : 'medium' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="badge" [class]="getStatusClass(selectedPurchase.status)">
+              {{ selectedPurchase.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Supplier & Medicine</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Supplier:</span>
+            <span class="detail-value">{{ selectedPurchase.supplier }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Medicine:</span>
+            <span class="detail-value">{{ selectedPurchase.medicine }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Quantity:</span>
+            <span class="detail-value">{{ selectedPurchase.quantity | number }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Financial Details</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Unit Price:</span>
+            <span class="detail-value">{{
+              selectedPurchase.unitPrice || getCalculatedUnitPrice(selectedPurchase)
+                | currency : 'PKR' : 'symbol' : '1.2-2'
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Total Cost:</span>
+            <span class="detail-value">{{
+              selectedPurchase.totalCost | currency : 'PKR' : 'symbol' : '1.2-2'
+            }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPurchase.notes">
+            <span class="detail-label">Notes:</span>
+            <span class="detail-value">{{ selectedPurchase.notes }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" *ngIf="selectedPurchase.status === 'Pending'">
+        <button class="btn primary" (click)="markReceived(selectedPurchase.id)">
+          ✅ Mark as Received
+        </button>
+        <button class="btn secondary" (click)="cancelPurchase(selectedPurchase.id)">
+          ❌ Cancel Order
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn secondary" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>

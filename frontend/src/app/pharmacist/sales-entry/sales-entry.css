@@ -1,0 +1,720 @@
+/* Main Container */
+.sales-container {
+    margin-left: 250px;
+    padding: 40px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a2b3c;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    color: #5d7a8c;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* Layout */
+.sales-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 1200px) {
+    .sales-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panel Styles */
+.panel {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 10px 40px rgba(0, 115, 170, 0.08);
+    border: 1px solid rgba(0, 168, 204, 0.1);
+    -webkit-backdrop-filter: blur(10);
+    backdrop-filter: blur(10px);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f7fa;
+}
+
+.panel-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a2b3c;
+    margin: 0;
+}
+
+.form-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-item {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f0f7fa;
+    color: #5d7a8c;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 32px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-icon {
+    font-size: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.form-group label.required::after {
+    content: " *";
+    color: #e53935;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 2px solid #e2e8f0;
+    font-size: 15px;
+    background: #f8fafc;
+    transition: all 0.25s ease;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #0ea5e9;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    outline: none;
+}
+
+/* Select Wrapper */
+.select-wrapper {
+    position: relative;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5d7a8c;
+    pointer-events: none;
+}
+
+.medicine-select {
+    padding-right: 40px;
+}
+
+/* Input with Icon */
+.input-with-icon {
+    position: relative;
+}
+
+.input-prefix {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5d7a8c;
+    font-weight: 600;
+}
+
+.input-with-icon input {
+    padding-left: 32px;
+}
+
+/* Quantity Controls */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quantity-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    font-size: 20px;
+    color: #5d7a8c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.quantity-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+.quantity-btn:active {
+    transform: scale(0.95);
+}
+
+.quantity-input {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    font-weight: 600;
+}
+
+/* Price Input Adjusted */
+.price-input.price-adjusted {
+    background: #fff8e1;
+    border-color: #ffd54f;
+}
+
+/* Medicine Card */
+.medicine-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.medicine-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.medicine-card-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a2b3c;
+    margin: 0;
+}
+
+.category-badge {
+    padding: 4px 12px;
+    background: #e6f7f1;
+    color: #009688;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.medicine-details {
+    display: grid;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #5d7a8c;
+}
+
+.detail-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a2b3c;
+}
+
+.stock-count {
+    font-weight: 700;
+    color: #10b981;
+}
+
+.price-tag {
+    font-weight: 700;
+    color: #6366f1;
+}
+
+.detail-value.expired {
+    color: #e53935;
+    font-weight: 600;
+}
+
+/* Payment Methods */
+.payment-methods {
+    margin-top: 8px;
+}
+
+.method-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.method-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.method-option:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+.method-option.selected {
+    border-color: #6366f1;
+    background: #f0f9ff;
+}
+
+.method-option input {
+    display: none;
+}
+
+.method-icon {
+    font-size: 24px;
+    margin-bottom: 6px;
+}
+
+.method-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f7fa;
+}
+
+/* Buttons */
+.btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.3px;
+    min-width: 100px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn.primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+}
+
+.btn.primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn.secondary {
+    background: linear-gradient(135deg, #eef2f7 0%, #dfe6f0 100%);
+    color: #5d7a8c;
+    border: 1px solid #d1d9e6;
+}
+
+.btn.secondary:hover {
+    background: linear-gradient(135deg, #dfe6f0 0%, #d0d9e9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(93, 122, 140, 0.15);
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+/* Spinner */
+.spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Sale Summary */
+.receipt-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6366f1;
+    background: #f0f9ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.summary-section {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f7fa;
+}
+
+.summary-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 16px;
+}
+
+.summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-item .item-value {
+    font-weight: 500;
+    color: #1a2b3c;
+    text-align: right;
+}
+
+.discount-amount {
+    color: #e53935;
+    font-weight: 600;
+}
+
+/* Totals Section */
+.totals-section {
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.total-row.subtotal {
+    font-size: 15px;
+    color: #5d7a8c;
+}
+
+.total-row.discount-row {
+    color: #e53935;
+    font-weight: 500;
+}
+
+.total-row.grand-total {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a2b3c;
+    padding-top: 16px;
+    border-top: 2px dashed #e2e8f0;
+    margin-top: 10px;
+}
+
+/* Payment Summary */
+.payment-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.payment-badge.cash {
+    background: #e6f7f1;
+    color: #009688;
+    border: 1px solid #86efac;
+}
+
+.payment-badge.card {
+    background: #f0f9ff;
+    color: #0ea5e9;
+    border: 1px solid #7dd3fc;
+}
+
+.payment-badge.upi {
+    background: #faf5ff;
+    color: #8b5cf6;
+    border: 1px solid #c4b5fd;
+}
+
+.payment-badge.insurance {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+
+.payment-badge.small {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.customer-name {
+    font-weight: 500;
+    color: #1a2b3c;
+}
+
+.sale-time {
+    font-family: 'Courier New', monospace;
+    color: #5d7a8c;
+}
+
+/* Stock Status */
+.stock-status {
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.status-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+}
+
+.stock-change {
+    font-size: 16px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.stock-change.low {
+    color: #e53935;
+}
+
+.stock-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.stock-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    transition: width 0.3s ease;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f7fa;
+}
+
+.quick-actions .btn {
+    flex: 1;
+    padding: 12px;
+}
+
+/* Recent Sales */
+.recent-sales {
+    margin-top: 24px;
+}
+
+.sales-table {
+    overflow-x: auto;
+}
+
+.sales-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sales-table th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #334155;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eef3f7;
+}
+
+.sales-table td {
+    padding: 16px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #eef3f7;
+}
+
+.medicine-cell {
+    font-weight: 500;
+    color: #1a2b3c;
+}
+
+.amount-cell {
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* Hints and Warnings */
+.hint {
+    display: block;
+    margin-top: 6px;
+    color: #7f8c8d;
+    font-size: 12px;
+}
+
+.stock-warning {
+    color: #e53935;
+    font-weight: 600;
+}
+
+.price-change {
+    color: #ff9800;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sales-container {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .method-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .quick-actions .btn {
+        width: 100%;
+    }
+}

@@ -1,1 +1,169 @@
-<p>inventory works!</p>
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<div class="pharmacist-inventory">
+  <h1>Inventory Management</h1>
+  <p class="subtitle">Manage medicine stock & monitor expiry dates</p>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !showModal" class="error-banner">
+    ⚠️ {{ errorMessage }}
+    <button class="close-error" (click)="errorMessage = ''">×</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading inventory...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && medicines.length === 0" class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h3>No Medicines Found</h3>
+    <p>Add medicines to your inventory to get started.</p>
+  </div>
+
+  <!-- Inventory Table -->
+  <div *ngIf="!isLoading && medicines.length > 0" class="panel">
+    <div class="table-header">
+      <div class="table-info">
+        Showing {{ medicines.length }} medicine{{ medicines.length !== 1 ? 's' : '' }}
+        <span class="stats">
+          <span class="stat-item ok">{{ okCount }} OK</span>
+          <span class="stat-item warning">{{ nearExpiryCount }} Near Expiry</span>
+          <span class="stat-item expired">{{ expiredCount }} Expired</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Medicine</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Expiry Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let m of medicines"
+            [class.low-stock]="m.quantity <= 5"
+            [class.expired-row]="isExpired(m.expiryDate)"
+          >
+            <td class="medicine-name">
+              <div class="medicine-name-content">
+                <strong>{{ m.name }}</strong>
+                <small *ngIf="m.brand">• {{ m.brand }}</small>
+              </div>
+            </td>
+            <td>{{ m.category || 'Uncategorized' }}</td>
+            <td>
+              <span class="quantity-display" [class.low]="m.quantity <= 5">
+                {{ m.quantity }}
+                <span *ngIf="m.quantity <= 5" class="low-indicator">Low!</span>
+              </span>
+            </td>
+            <td>
+              <span [class.expired-date]="isExpired(m.expiryDate)">
+                {{ formatDate(m.expiryDate) }}
+              </span>
+              <div *ngIf="isNearExpiry(m.expiryDate) && !isExpired(m.expiryDate)" class="days-left">
+                {{ getDaysLeft(m.expiryDate) }} days left
+              </div>
+            </td>
+            <td>
+              <span class="badge" [class]="getStatusClass(m)">
+                {{ getStatusText(m) }}
+              </span>
+            </td>
+            <td>
+              <button class="btn update-btn" (click)="openUpdateModal(m)">
+                <span class="btn-icon">✏️</span> Update
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Update Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Stock Details</h3>
+        <button class="close-btn" (click)="closeModal()" [disabled]="isSaving">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Success Message -->
+        <div *ngIf="saveSuccess" class="success-message">
+          <span class="success-icon">✓</span>
+          Stock updated successfully!
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="error-message">⚠️ {{ errorMessage }}</div>
+
+        <!-- Form -->
+        <div class="form-group">
+          <label for="quantity">Quantity *</label>
+          <input
+            id="quantity"
+            type="number"
+            [(ngModel)]="edit.quantity"
+            min="0"
+            step="1"
+            placeholder="Enter quantity"
+            [disabled]="isSaving"
+            (keyup.enter)="updateMedicine()"
+          />
+          <small class="hint">Enter the current stock quantity</small>
+        </div>
+
+        <div class="form-group">
+          <label for="expiryDate">Expiry Date *</label>
+          <input
+            id="expiryDate"
+            type="date"
+            [(ngModel)]="edit.expiryDate"
+            [min]="today"
+            [disabled]="isSaving"
+            (keyup.enter)="updateMedicine()"
+          />
+          <small class="hint">Select the expiration date</small>
+        </div>
+
+        <div class="medicine-info">
+          <h4>Medicine Information</h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Name:</span>
+              <span class="info-value">{{ edit.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Category:</span>
+              <span class="info-value">{{ edit.category || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isSaving">
+          Cancel
+        </button>
+        <button class="btn btn-primary" (click)="updateMedicine()" [disabled]="isSaving">
+          <span *ngIf="!isSaving">Save Changes</span>
+          <span *ngIf="isSaving" class="saving-indicator">
+            <span class="spinner-small"></span> Saving...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

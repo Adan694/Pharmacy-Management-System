@@ -45,7 +45,7 @@
       </div>
       <div class="stat-card">
         <h3>Total Value</h3>
-        <span>{{ inventoryStats.totalValue | currency }}</span>
+        <span>{{ inventoryStats.totalValue | currency : 'PKR ' }}</span>
       </div>
     </div>
 
@@ -134,7 +134,7 @@
                 />
               </td>
 
-              <td *ngIf="editingMedicineId !== m.id">{{ m.price | currency }}</td>
+              <td *ngIf="editingMedicineId !== m.id">{{ m.price | currency : 'PKR ' }}</td>
               <td *ngIf="editingMedicineId === m.id">
                 <input
                   type="number"
@@ -286,7 +286,7 @@
             <div class="form-group">
               <label for="price">Price *</label>
               <div class="price-input-group">
-                <span class="currency-symbol">₹</span>
+                <span class="currency-symbol">PKR</span>
                 <input
                   id="price"
                   type="number"
@@ -429,22 +429,19 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="editPrice">Price *</label>
-              <div class="price-input-group">
-                <span class="currency-symbol">₹</span>
-                <input
-                  id="editPrice"
-                  type="number"
-                  [(ngModel)]="editMedicine.price"
-                  name="editPrice"
-                  placeholder="0.00"
-                  required
-                  min="0"
-                  step="0.01"
-                  [disabled]="updatingMedicine"
-                />
-              </div>
+            <div class="price-input-group">
+              <span class="currency-symbol">PKR</span>
+              <input
+                id="editPrice"
+                type="number"
+                [(ngModel)]="editMedicine.price"
+                name="editPrice"
+                placeholder="0.00"
+                required
+                min="0"
+                step="0.01"
+                [disabled]="updatingMedicine"
+              />
             </div>
           </div>
 

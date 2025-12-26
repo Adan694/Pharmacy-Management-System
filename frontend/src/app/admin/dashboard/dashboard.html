@@ -1,7 +1,7 @@
 <app-sidebar></app-sidebar>
 
 <div class="admin-dashboard">
-  <!-- Loading & Error (same as before) -->
+  <!-- Loading & Error -->
   <div *ngIf="loading" class="loading-overlay">
     <div class="loading-spinner"></div>
     <p>Loading dashboard data...</p>
@@ -25,7 +25,7 @@
         <div class="card-icon">💰</div>
         <div class="card-content">
           <div class="card-label">Today Sales</div>
-          <div class="card-value">{{ summary.todaySalesAmount | currency }}</div>
+          <div class="card-value">₨ {{ summary.todaySalesAmount | number : '1.0-0' }}</div>
         </div>
       </div>
 
@@ -34,7 +34,7 @@
         <div class="card-icon">📈</div>
         <div class="card-content">
           <div class="card-label">This Month Sales</div>
-          <div class="card-value">{{ summary.monthSalesAmount | currency }}</div>
+          <div class="card-value">₨ {{ summary.monthSalesAmount | number : '1.0-0' }}</div>
         </div>
       </div>
 
@@ -43,7 +43,7 @@
         <div class="card-icon">📦</div>
         <div class="card-content">
           <div class="card-label">Total Purchases</div>
-          <div class="card-value">{{ summary.totalPurchasesAmount | currency }}</div>
+          <div class="card-value">₨ {{ summary.totalPurchasesAmount | number : '1.0-0' }}</div>
         </div>
       </div>
 
@@ -84,7 +84,6 @@
       </div>
     </div>
 
-    <!-- Chart -->
     <!-- Chart Panel -->
     <div class="panel chart-panel">
       <div class="panel-header">
@@ -123,12 +122,12 @@
         <div class="legend-item active">
           <div class="legend-color sales"></div>
           <span class="legend-label">Sales:</span>
-          <span class="legend-value">{{ getTotalSales() | currency }}</span>
+          <span class="legend-value">₨ {{ getTotalSales() | number : '1.0-0' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color purchases"></div>
           <span class="legend-label">Purchases:</span>
-          <span class="legend-value">{{ getTotalPurchases() | currency }}</span>
+          <span class="legend-value">₨ {{ getTotalPurchases() | number : '1.0-0' }}</span>
         </div>
       </div>
 
@@ -137,7 +136,7 @@
         <div class="chart-summary">
           <div class="summary-stat">
             <div class="summary-label">Total Revenue</div>
-            <div class="summary-value">{{ getNetProfit() | currency }}</div>
+            <div class="summary-value">₨ {{ getNetProfit() | number : '1.0-0' }}</div>
             <div class="summary-change positive">↑ 12.5%</div>
           </div>
         </div>

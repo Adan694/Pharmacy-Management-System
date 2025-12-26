@@ -41,7 +41,9 @@
           <div class="summary-icon">💰</div>
           <div>
             <div class="summary-label">Total Purchase Amount</div>
-            <div class="summary-value">{{ summary.totalPurchasesAmount | currency }}</div>
+            <div class="summary-value">
+              PKR {{ summary.totalPurchasesAmount | number : '1.0-0' }}
+            </div>
           </div>
         </div>
 
@@ -51,12 +53,13 @@
           <div>
             <div class="summary-label">Current View</div>
             <div class="summary-value">
-              {{ purchases.length }} orders ({{ getPurchasesTotal() | currency }})
+              {{ purchases.length }} orders (PKR {{ getPurchasesTotal() | number : '1.0-0' }})
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Chart Panel -->
       <div class="chart-panel">
         <canvas #purchaseChart></canvas>
         <div class="chart-controls">
@@ -83,13 +86,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="startDate">Start Date</label>
-            <input
-              id="startDate"
-              type="date"
-              [(ngModel)]="filters.startDate"
-              placeholder="Start Date"
-              [max]="today"
-            />
+            <input id="startDate" type="date" [(ngModel)]="filters.startDate" [max]="today" />
           </div>
 
           <div class="form-group">
@@ -98,7 +95,6 @@
               id="endDate"
               type="date"
               [(ngModel)]="filters.endDate"
-              placeholder="End Date"
               [min]="filters.startDate"
               [max]="today"
             />
@@ -155,11 +151,15 @@
         <div class="panel-header">
           <h2>Purchase Orders</h2>
           <div class="table-summary">
-            <span class="summary-item"
-              >Showing {{ purchases.length }} of {{ totalRecords }} records</span
-            >
-            <span class="summary-item">Total Cost: {{ getPurchasesTotal() | currency }}</span>
-            <span class="summary-item">Avg. Cost: {{ getAveragePurchase() | currency }}</span>
+            <span class="summary-item">
+              Showing {{ purchases.length }} of {{ totalRecords }} records
+            </span>
+            <span class="summary-item">
+              Total Cost: PKR {{ getPurchasesTotal() | number : '1.0-0' }}
+            </span>
+            <span class="summary-item">
+              Avg. Cost: PKR {{ getAveragePurchase() | number : '1.0-0' }}
+            </span>
           </div>
         </div>
 
@@ -208,8 +208,8 @@
                 <td>{{ p.supplier || 'N/A' }}</td>
                 <td>{{ p.medicine || 'N/A' }}</td>
                 <td class="quantity-cell">{{ p.quantity || 0 }}</td>
-                <td>{{ (p.unitCost | currency) || '$0.00' }}</td>
-                <td class="amount-cell">{{ (p.totalCost | currency) || '$0.00' }}</td>
+                <td>PKR {{ p.unitCost | number : '1.0-0' }}</td>
+                <td>PKR {{ p.totalCost | number : '1.0-0' }}</td>
                 <td>
                   <span
                     class="status-badge"
@@ -241,7 +241,9 @@
           <button class="btn secondary" (click)="prevPage()" [disabled]="currentPage === 1">
             Previous
           </button>
-          <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalRecords }} total records)</span>
+          <span>
+            Page {{ currentPage }} of {{ totalPages }} ({{ totalRecords }} total records)
+          </span>
           <button
             class="btn secondary"
             (click)="nextPage()"

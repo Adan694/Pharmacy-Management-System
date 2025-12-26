@@ -2,13 +2,17 @@
 import { Routes } from '@angular/router';
 import { Login } from './auth/login/login';
 import { AdminDashboard } from './admin/dashboard/dashboard';
-import { PharmacistDashboard } from './pharmacist/dashboard/dashboard';
 import { authGuard } from './shared/guards/authguard';
 import { Users } from './admin/users/users';
 import { Inventory } from './admin/inventory/inventory';
-import { Reports } from './admin/reports/reports';
 import { Sales } from './admin/sales/sales';
 import { Purchase } from './admin/purchase/purchase';
+import { PharmacistDashboard } from './pharmacist/Pharmacistdashboard/Pharmacistdashboard';
+import { PharmacistInventory } from './pharmacist/inventory/inventory';
+import { Alerts } from './pharmacist/alerts/alerts';
+import { PharmacistSales } from './pharmacist/pharmacistsales/pharmacistsales';
+import { SalesEntry } from './pharmacist/sales-entry/sales-entry';
+import { PharmPurchase } from './pharmacist/pharm-purchase/pharm-purchase';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,12 +22,19 @@ export const routes: Routes = [
   },
   { path: 'admin/users', component: Users },
   { path: 'admin/medicines', component: Inventory },
-  {path: 'admin/reports', component: Reports},
   {path: 'admin/sales', component: Sales},
   {path: 'admin/purchase', component: Purchase},
 
   {
     path: 'pharmacist', component: PharmacistDashboard, canActivate: [authGuard],
-    data: { roles: ['Pharmacist'] } },
-  { path: '**', redirectTo: 'login' }
+    data: { roles: ['Pharmacist'] }
+  },
+    {path: 'pharmacist/inventory', component: PharmacistInventory},
+{ path: 'pharmacist/sales', component: PharmacistSales },
+{ path: 'pharmacist/sales-entry', component: SalesEntry },
+{ path: 'pharmacist/purchase', component: PharmPurchase },
+
+  // { path: '**', redirectTo: 'login' },
+    {path: 'pharmacist/alerts', component: Alerts },
+  
 ];

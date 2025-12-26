@@ -23,7 +23,7 @@ public class AdminController : ControllerBase
         public string Role { get; set; }
     }
 
-    // ✅ Get all users
+    //  Get all users
     [HttpGet("users")]
     public IActionResult GetUsers()
     {
@@ -40,7 +40,7 @@ public class AdminController : ControllerBase
         return Ok(users);
     }
 
-    // ✅ Create user
+    //  Create user
     [HttpPost("users")]
     public IActionResult CreateUser(CreateUserDto dto)
     {
@@ -62,7 +62,7 @@ public class AdminController : ControllerBase
         return Ok(new { message = "User created" });
     }
 
-    // ✅ Activate / Deactivate
+    //  Activate / Deactivate
     [HttpPut("users/{id}/status")]
     public IActionResult UpdateStatus(int id)
     {
@@ -120,7 +120,7 @@ public class AdminController : ControllerBase
         return Ok(med);
     }
 
-    // ✅ FIXED: Get all sales with optional filters - make parameters nullable
+    //  Get all sales with optional filters - make parameters nullable
     [HttpGet("sales")]
     public IActionResult GetSales([FromQuery] string? startDate, [FromQuery] string? endDate, 
         [FromQuery] string? search, [FromQuery] string? cashier)
@@ -158,7 +158,7 @@ public class AdminController : ControllerBase
         return File(bytes, "text/csv", "sales-report.csv");
     }
 
-    // ✅ Get all purchases - already correct with nullable DateTime?
+    //  Get all purchases - already correct with nullable DateTime?
     [HttpGet("purchases")]
     public IActionResult GetPurchases([FromQuery] string? search, [FromQuery] string? supplier, 
         [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)

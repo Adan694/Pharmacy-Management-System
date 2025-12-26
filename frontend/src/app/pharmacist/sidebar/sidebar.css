@@ -1,0 +1,77 @@
+.pharmacist-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0f2a33, #0b1e24);
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 25px 20px;
+    color: #e6f4f6;
+}
+
+/* Brand */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.brand-icon {
+    font-size: 32px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.brand-text h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.brand-text span {
+    font-size: 12px;
+    color: #9fd3da;
+}
+
+/* Menu */
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #cfeaed;
+    transition: background 0.2s, color 0.2s;
+}
+
+.menu a:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.menu a.active {
+    background: rgba(0, 212, 255, 0.15);
+    color: #00d4ff;
+}
+
+.icon {
+    font-size: 18px;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+}
+
+/* Logout */
+.logout {
+    color: #ffb3b3;
+}
+
+.logout:hover {
+    background: rgba(255, 99, 99, 0.15);
+}

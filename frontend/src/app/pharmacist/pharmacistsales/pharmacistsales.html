@@ -1,0 +1,32 @@
+<app-pharmacist-sidebar></app-pharmacist-sidebar>
+
+<div class="sales-report-container">
+  <h1>Sales Analytics</h1>
+  <p class="subtitle">Top selling medicines and revenue insights</p>
+
+  <div class="chart-wrapper">
+    <canvas #salesChart></canvas>
+  </div>
+
+  <div class="top-sales-list" *ngIf="topSales.length">
+    <h2>Top 5 Medicines</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Medicine</th>
+          <th>Quantity Sold</th>
+          <th>Revenue ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let med of topSales">
+          <td>{{ med.product }}</td>
+          <td>{{ med.totalSold }}</td>
+          <td>{{ med.revenue | number : '1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p *ngIf="!topSales.length">No sales data available.</p>
+</div>
