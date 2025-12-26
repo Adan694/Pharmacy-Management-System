@@ -7,7 +7,6 @@
     position: relative;
 }
 
-/* Responsive Margins */
 @media (max-width: 1024px) {
     .admin-dashboard.purchase-reports {
         margin-left: 250px;
